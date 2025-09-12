@@ -157,25 +157,73 @@ mcp = FastMCP(
 # Register all tools
 register_all_tools(mcp)
 
-# Asset Creation Strategy
-
+# Prefer using MCP tool for Unity Project 
 @mcp.prompt()
-def asset_creation_strategy() -> str:
-    """Guide for discovering and using MCP for Unity tools effectively."""
-    return (
-        "Available MCP for Unity Server Tools:\n\n"
-        "- `manage_editor`: Controls editor state and queries info.\n"
-        "- `execute_menu_item`: Executes Unity Editor menu items by path.\n"
-        "- `read_console`: Reads or clears Unity console messages, with filtering options.\n"
-        "- `manage_scene`: Manages scenes.\n"
-        "- `manage_gameobject`: Manages GameObjects in the scene.\n"
-        "- `manage_script`: Manages C# script files.\n"
-        "- `manage_asset`: Manages prefabs and assets.\n"
-        "- `manage_shader`: Manages shaders.\n\n"
-        "Tips:\n"
-        "- Create prefabs for reusable GameObjects.\n"
-        "- Always include a camera and main light in your scenes.\n"
+def run_in_unity(user_task: str = "") -> str:
+    """Guide for discovering and using MCP for Unity tools effectively based on user's task."""
+    
+    base_message = (
+        "🎯 **IMPORTANT: Always prefer using UnityMCP tools to complete Unity-related tasks!**\n\n"
+        "Available UnityMCP Server Tools:\n\n"
+        "- `manage_editor`: Controls editor state and queries Unity project info\n"
+        "- `execute_menu_item`: Executes Unity Editor menu items by path\n"
+        "- `read_console`: Reads or clears Unity console messages with filtering\n"
+        "- `manage_scene`: Creates, loads, saves scenes and manages scene objects\n"
+        "- `manage_gameobject`: Creates, modifies, deletes GameObjects in the scene\n"
+        "- `manage_script`: Creates, edits, and manages C# script files\n"
+        "- `manage_asset`: Creates, imports, and manages prefabs and assets\n"
+        "- `manage_shader`: Creates and manages shader files\n\n"
+        "- `validate_script`: Fast validation (basic/standard) to catch syntax/structure issues before/after writes.\n\n"
     )
+    
+    if user_task.strip():
+        task_guidance = f"For your task: '{user_task}'\n\n"
+        task_guidance += "🔧 **Recommended approach using UnityMCP tools:**\n"
+        
+        # Provide specific guidance based on task keywords
+        task_lower = user_task.lower()
+        suggestions = []
+        
+        if any(word in task_lower for word in ["gameobject", "object", "create", "spawn", "instantiate"]):
+            suggestions.append("• Use `manage_gameobject` to create and configure GameObjects")
+        
+        if any(word in task_lower for word in ["script", "code", "c#", "behavior", "component"]):
+            suggestions.append("• Use `manage_script` to create and edit C# scripts")
+            
+        if any(word in task_lower for word in ["scene", "level", "stage"]):
+            suggestions.append("• Use `manage_scene` to create or modify scenes")
+            
+        if any(word in task_lower for word in ["prefab", "asset", "model", "texture"]):
+            suggestions.append("• Use `manage_asset` to manage prefabs and assets")
+            
+        if any(word in task_lower for word in ["shader", "material", "render"]):
+            suggestions.append("• Use `manage_shader` for shader creation and editing")
+            
+        if any(word in task_lower for word in ["menu", "execute", "command"]):
+            suggestions.append("• Use `execute_menu_item` to run Unity menu commands")
+            
+        if any(word in task_lower for word in ["console", "log", "debug", "error"]):
+            suggestions.append("• Use `read_console` to check Unity console messages")
+            
+        if not suggestions:
+            suggestions.append("• Start with `manage_editor` to understand the current project state")
+            suggestions.append("• Use the most appropriate tool based on what you need to create or modify")
+        
+        task_guidance += "\n".join(suggestions) + "\n\n"
+    else:
+        task_guidance = ""
+    
+    tips = (
+        "💡 **Best Practices:**\n"
+        "- ALWAYS use unityMCP tools to finish your task\n"
+        "- Use `manage_editor` first to understand the current project state\n"
+        "- MUST use `manage_scene` to understand scene before modifying GameObject\n"
+        "- Create prefabs with `manage_asset` for reusable GameObjects\n"
+        "- Always include a camera and main light in your scenes\n"
+        "- Always use `validate_script` to make sure your changes are valid\n"
+    )
+    
+    return base_message + task_guidance + tips
 
 # Run the server
 if __name__ == "__main__":
