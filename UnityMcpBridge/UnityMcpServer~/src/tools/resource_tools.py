@@ -4,7 +4,7 @@ can still list and read files via normal tools. These call into the same
 safe path logic (re-implemented here to avoid importing server.py).
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 import re
 from pathlib import Path
 from urllib.parse import urlparse, unquote
@@ -41,7 +41,7 @@ def _coerce_int(value: Any, default: Optional[int] = None, minimum: Optional[int
     except Exception:
         return default
 
-def _resolve_project_root(override: str | None) -> Path:
+def _resolve_project_root(override: Optional[str]) -> Path:
     # 1) Explicit override
     if override:
         pr = Path(override).expanduser().resolve()
@@ -98,8 +98,8 @@ def _resolve_project_root(override: str | None) -> Path:
     return Path.cwd().resolve()
 
 
-def _resolve_safe_path_from_uri(uri: str, project: Path) -> Path | None:
-    raw: str | None = None
+def _resolve_safe_path_from_uri(uri: str, project: Path) -> Optional[Path]:
+    raw: Optional[str] = None
     if uri.startswith("unity://path/"):
         raw = uri[len("unity://path/"):]
     elif uri.startswith("file://"):
@@ -143,7 +143,7 @@ def register_resource_tools(mcp: FastMCP) -> None:
         ctx: Optional[Context] = None,
         pattern: Optional[str] = "*.cs",
         under: str = "Assets",
-        limit: Any = 200,
+        limit: Optional[int] = 200,
         project_root: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
@@ -202,12 +202,12 @@ def register_resource_tools(mcp: FastMCP) -> None:
     ))
     @telemetry_tool("read_resource")
     async def read_resource(
-        uri: str,
         ctx: Optional[Context] = None,
-        start_line: Any = None,
-        line_count: Any = None,
-        head_bytes: Any = None,
-        tail_lines: Any = None,
+        uri: str = "",
+        start_line: Optional[int] = None,
+        line_count: Optional[int] = None,
+        head_bytes: Optional[int] = None,
+        tail_lines: Optional[int] = None,
         project_root: Optional[str] = None,
         request: Optional[str] = None,
     ) -> Dict[str, Any]:
@@ -216,6 +216,9 @@ def register_resource_tools(mcp: FastMCP) -> None:
         One of line window (start_line/line_count) or head_bytes can be used to limit size.
         """
         try:
+            # Validate required uri parameter
+            if not uri:
+                return {"success": False, "error": "uri parameter is required"}
             # Serve the canonical spec directly when requested (allow bare or with scheme)
             if uri in ("unity://spec/script-edits", "spec/script-edits", "script-edits"):
                 spec_json = (
@@ -357,12 +360,12 @@ def register_resource_tools(mcp: FastMCP) -> None:
     @mcp.tool()
     @telemetry_tool("find_in_file")
     async def find_in_file(
-        uri: str,
-        pattern: str,
         ctx: Optional[Context] = None,
+        uri: str = "",
+        pattern: str = "",
         ignore_case: Optional[bool] = True,
         project_root: Optional[str] = None,
-        max_results: Any = 200,
+        max_results: Optional[int] = 200,
     ) -> Dict[str, Any]:
         """
         Searches a file with a regex pattern and returns line numbers and excerpts.
@@ -373,6 +376,11 @@ def register_resource_tools(mcp: FastMCP) -> None:
         """
         # re is already imported at module level
         try:
+            # Validate required parameters
+            if not uri:
+                return {"success": False, "error": "uri parameter is required"}
+            if not pattern:
+                return {"success": False, "error": "pattern parameter is required"}
             project = _resolve_project_root(project_root)
             p = _resolve_safe_path_from_uri(uri, project)
             if not p or not p.exists() or not p.is_file():

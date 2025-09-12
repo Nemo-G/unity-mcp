@@ -1,7 +1,7 @@
 """
 Defines the execute_menu_item tool for running Unity Editor menu commands.
 """
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from mcp.server.fastmcp import FastMCP, Context
 from unity_connection import get_unity_connection, send_command_with_retry  # Import retry helper
 from config import config
@@ -15,10 +15,10 @@ def register_execute_menu_item_tools(mcp: FastMCP):
     @mcp.tool()
     @telemetry_tool("execute_menu_item")
     def execute_menu_item(
-        ctx: Any,
+        ctx: Context,
         menu_path: str,
         action: str = 'execute',
-        parameters: Dict[str, Any] = None,
+        parameters: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Executes a Unity Editor menu item via its path (e.g., "File/Save Project").
 

@@ -1,5 +1,5 @@
 from mcp.server.fastmcp import FastMCP, Context
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from unity_connection import get_unity_connection, send_command_with_retry
 from config import config
 import time
@@ -14,11 +14,11 @@ def register_manage_shader_tools(mcp: FastMCP):
     @mcp.tool()
     @telemetry_tool("manage_shader")
     def manage_shader(
-        ctx: Any,
+        ctx: Context,
         action: str,
         name: str,
         path: str,
-        contents: str,
+        contents: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Manages shader scripts in Unity (create, read, update, delete).
 

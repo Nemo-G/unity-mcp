@@ -1,5 +1,5 @@
 from mcp.server.fastmcp import FastMCP, Context
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from unity_connection import get_unity_connection, send_command_with_retry
 from config import config
 import time
@@ -16,7 +16,7 @@ def register_manage_scene_tools(mcp: FastMCP):
         action: str,
         name: str = "",
         path: str = "",
-        build_index: Any = None,
+        build_index: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Manages Unity scenes (load, save, create, get hierarchy, etc.).
 

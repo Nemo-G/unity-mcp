@@ -1,7 +1,7 @@
 """
 Defines the read_console tool for accessing Unity Editor console messages.
 """
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import time
 from mcp.server.fastmcp import FastMCP, Context
 from unity_connection import get_unity_connection, send_command_with_retry
@@ -15,13 +15,13 @@ def register_read_console_tools(mcp: FastMCP):
     @telemetry_tool("read_console")
     def read_console(
         ctx: Context,
-        action: str = None,
-        types: List[str] = None,
-        count: Any = None,
-        filter_text: str = None,
-        since_timestamp: str = None,
-        format: str = None,
-        include_stacktrace: bool = None
+        action: str = "get",
+        types: Optional[List[str]] = None,
+        count: Optional[int] = None,
+        filter_text: Optional[str] = None,
+        since_timestamp: Optional[str] = None,
+        format: str = "detailed",
+        include_stacktrace: bool = True
     ) -> Dict[str, Any]:
         """Gets messages from or clears the Unity Editor console.
 

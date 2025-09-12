@@ -1,5 +1,5 @@
 from mcp.server.fastmcp import FastMCP, Context
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from unity_connection import get_unity_connection, send_command_with_retry
 from config import config
 import time
@@ -12,35 +12,35 @@ def register_manage_gameobject_tools(mcp: FastMCP):
     @mcp.tool()
     @telemetry_tool("manage_gameobject")
     def manage_gameobject(
-        ctx: Any,
+        ctx: Context,
         action: str,
-        target: str = None,  # GameObject identifier by name or path
-        search_method: str = None,
+        target: Optional[str] = None,  # GameObject identifier by name or path
+        search_method: Optional[str] = None,
         # --- Combined Parameters for Create/Modify ---
-        name: str = None,  # Used for both 'create' (new object name) and 'modify' (rename)
-        tag: str = None,  # Used for both 'create' (initial tag) and 'modify' (change tag)
-        parent: str = None,  # Used for both 'create' (initial parent) and 'modify' (change parent)
-        position: List[float] = None,
-        rotation: List[float] = None,
-        scale: List[float] = None,
-        components_to_add: List[str] = None,  # List of component names to add
-        primitive_type: str = None,
+        name: Optional[str] = None,  # Used for both 'create' (new object name) and 'modify' (rename)
+        tag: Optional[str] = None,  # Used for both 'create' (initial tag) and 'modify' (change tag)
+        parent: Optional[str] = None,  # Used for both 'create' (initial parent) and 'modify' (change parent)
+        position: Optional[List[float]] = None,
+        rotation: Optional[List[float]] = None,
+        scale: Optional[List[float]] = None,
+        components_to_add: Optional[List[str]] = None,  # List of component names to add
+        primitive_type: Optional[str] = None,
         save_as_prefab: bool = False,
-        prefab_path: str = None,
+        prefab_path: Optional[str] = None,
         prefab_folder: str = "Assets/Prefabs",
         # --- Parameters for 'modify' ---
-        set_active: bool = None,
-        layer: str = None,  # Layer name
-        components_to_remove: List[str] = None,
-        component_properties: Dict[str, Dict[str, Any]] = None,
+        set_active: Optional[bool] = None,
+        layer: Optional[str] = None,  # Layer name
+        components_to_remove: Optional[List[str]] = None,
+        component_properties: Optional[Dict[str, Dict[str, Any]]] = None,
         # --- Parameters for 'find' ---
-        search_term: str = None,
+        search_term: Optional[str] = None,
         find_all: bool = False,
         search_in_children: bool = False,
         search_inactive: bool = False,
         # -- Component Management Arguments --
-        component_name: str = None,
-        includeNonPublicSerialized: bool = None, # Controls serialization of private [SerializeField] fields
+        component_name: Optional[str] = None,
+        includeNonPublicSerialized: Optional[bool] = None, # Controls serialization of private [SerializeField] fields
     ) -> Dict[str, Any]:
         """Manages GameObjects: create, modify, delete, find, and component operations.
 
