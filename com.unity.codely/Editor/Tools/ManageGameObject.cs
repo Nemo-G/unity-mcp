@@ -929,6 +929,21 @@ namespace UnityTcp.Editor.Tools
                 return Response.Success("No matching GameObjects found.", new List<object>());
             }
 
+            // Check if result would be too large
+            if (foundObjects.Count > 100)
+            {
+                string searchTerm = targetToken?.ToString() ?? "unknown";
+                return Response.Error(
+                    $"Too many GameObjects found ({foundObjects.Count}). Response would be too large. " +
+                    "Hints to narrow scope:\n" +
+                    "1. Use more specific search criteria (exact names instead of partial matches)\n" +
+                    "2. Add 'findAll': false to get only the first match\n" +
+                    "3. Use different searchMethod: 'by_id', 'by_path', or 'by_name' for exact matches\n" +
+                    "4. Search within a specific parent object instead of the entire scene\n" +
+                    $"5. Found objects include: {string.Join(", ", foundObjects.Take(10).Select(go => go.name))}{(foundObjects.Count > 10 ? "..." : "")}"
+                );
+            }
+
             // Use the new serializer helper
             //var results = foundObjects.Select(go => GetGameObjectData(go)).ToList();
             var results = foundObjects.Select(go => Helpers.GameObjectSerializer.GetGameObjectData(go)).ToList();
@@ -953,7 +968,20 @@ namespace UnityTcp.Editor.Tools
                 int componentCount = componentsToIterate.Count; 
                 originalComponents = null; // Null the original reference
                 // Debug.Log($"[GetComponentsFromTarget] Found {componentCount} components on {targetGo.name}. Copied to list, nulled original. Starting REVERSE for loop...");
-                // --- End Copy and Null --- 
+                // --- End Copy and Null ---
+                
+                // Check if component serialization would be too large
+                if (componentCount > 50) 
+                {
+                    return Response.Error(
+                        $"GameObject '{targetGo.name}' has too many components ({componentCount}). Response would be too large. " +
+                        "Hints to narrow scope:\n" +
+                        "1. Use 'manage_gameobject' with action='find' to get basic GameObject info without components\n" +
+                        "2. Query specific components by type instead of all components\n" +
+                        "3. Use 'includeNonPublicSerialized': false to reduce serialized data per component\n" +
+                        $"4. Component types found: {string.Join(", ", componentsToIterate.Take(10).Select(c => c.GetType().Name))}{(componentCount > 10 ? "..." : "")}"
+                    );
+                } 
                 
                 var componentData = new List<object>();
                 

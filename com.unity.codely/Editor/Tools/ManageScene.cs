@@ -402,6 +402,26 @@ namespace UnityTcp.Editor.Tools
                 try { TcpLog.Info("[ManageScene] get_hierarchy: fetching root objects", always: false); } catch { }
                 GameObject[] rootObjects = activeScene.GetRootGameObjects();
                 try { TcpLog.Info($"[ManageScene] get_hierarchy: rootCount={rootObjects?.Length ?? 0}", always: false); } catch { }
+                
+                // Count total GameObjects to avoid massive responses
+                int totalObjectCount = 0;
+                foreach (var rootObj in rootObjects)
+                {
+                    totalObjectCount += CountGameObjectsRecursive(rootObj);
+                }
+                
+                // Return hint if too many objects would be serialized
+                if (totalObjectCount > 500)
+                {
+                    return Response.Error(
+                        $"Scene hierarchy too large to return ({totalObjectCount} GameObjects). " +
+                        "Hints to narrow scope:\n" +
+                        "1. Use 'manage_gameobject' with action='find' and specific search criteria\n" +
+                        "2. Use 'manage_gameobject' with action='find' by_name, by_tag, or by_path\n" +
+                        $"3. Search for specific root objects: {string.Join(", ", rootObjects.Take(10).Select(go => go.name))}{(rootObjects.Length > 10 ? "..." : "")}"
+                    );
+                }
+                
                 var hierarchy = rootObjects.Select(go => GetGameObjectDataRecursive(go)).ToList();
 
                 var resp = Response.Success(
@@ -416,6 +436,20 @@ namespace UnityTcp.Editor.Tools
                 try { TcpLog.Error($"[ManageScene] get_hierarchy: exception {e.Message}"); } catch { }
                 return Response.Error($"Error getting scene hierarchy: {e.Message}");
             }
+        }
+
+        /// <summary>
+        /// Counts total GameObjects in a hierarchy recursively.
+        /// </summary>
+        private static int CountGameObjectsRecursive(GameObject go)
+        {
+            if (go == null) return 0;
+            int count = 1; // Count this object
+            foreach (Transform child in go.transform)
+            {
+                count += CountGameObjectsRecursive(child.gameObject);
+            }
+            return count;
         }
 
         /// <summary>
