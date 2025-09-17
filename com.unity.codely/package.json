@@ -1,0 +1,25 @@
+{
+  "name": "com.unity.codely",
+  "version": "1.0.0",
+  "displayName": "Unity TCP Bridge",
+  "description": "TCP socket server for Unity Editor with port management and client handling capabilities",
+  "unity": "2021.3",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.0.2"
+  },
+  "keywords": [
+    "tcp",
+    "socket",
+    "networking",
+    "server",
+    "editor",
+    "tools"
+  ],
+  "author": {
+    "name": "Yousandi Technologies"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nemo-G/unity-mcp.git"
+  }
+}
