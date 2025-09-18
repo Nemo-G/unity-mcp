@@ -21,6 +21,7 @@ namespace UnityTcp.Editor.Tools
             { "HandleReadConsole", ReadConsole.HandleCommand },
             { "HandleExecuteMenuItem", ExecuteMenuItem.HandleCommand },
             { "HandleManageShader", ManageShader.HandleCommand},
+            { "HandleManageScreenshot", ManageScreenshot.HandleCommand },
         };
 
         /// <summary>
